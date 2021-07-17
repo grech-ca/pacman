@@ -1,0 +1,19 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  letter-spacing: 0.5em;
+}
+
+.pacman {
+  font-family: sans-serif monospace;
+  font-size: 20px;
+  white-space: pre;
+}
