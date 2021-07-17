@@ -1,26 +1,18 @@
 import playground from '../data/playground';
+import Player from './player';
 
-const RENDER_INTERVAL = 200;
-const GAME_SIZE = 600;
-const CELL_SIZE = 20;
-
-const FOOD_SIZE = 4;
-const PLAYER_SIZE = 18;
-
-enum Color {
-  Black = '#000',
-  White = '#fff',
-  Blue = '#00f',
-  Orange = '#fa0',
-  Yellow = '#f00',
-}
+import { GAME_SIZE, CELL_SIZE, FOOD_SIZE, TICK_SPEED } from '../utils/constants';
+import { ArrowDirectionMap } from '../utils/mappings';
+import { Color, Arrow } from '../utils/enums';
 
 class Game {
-  private canvas: HTMLCanvasElement;
-  private context: CanvasRenderingContext2D;
-  private playground: HTMLDivElement;
+  canvas: HTMLCanvasElement;
+  context: CanvasRenderingContext2D;
+  playground: HTMLDivElement;
+  level: number[][];
+  player: Player;
 
-  private interval: ReturnType<typeof setInterval>;
+  interval: ReturnType<typeof setInterval>;
 
   constructor () {
     this.canvas = document.createElement('canvas');
@@ -28,17 +20,40 @@ class Game {
 
     this.canvas.height = GAME_SIZE;
     this.canvas.width = GAME_SIZE;
+    this.canvas.tabIndex = 0;
 
     this.playground = document.querySelector('.pacman');
+    this.level = playground;
+
+    this.player = new Player(this);
+
+    this.canvas.addEventListener('keydown', e => {
+      if (Object.values(Arrow).includes(e.key as Arrow)) this.player.setDirection(ArrowDirectionMap[e.key]);
+      if (e.key === " ") {
+        if (this.interval) {
+          clearInterval(this.interval);
+          this.interval = null;
+        } else {
+          this.interval = setInterval(this.tick, TICK_SPEED);
+        }
+      }
+    })
   }
 
   start() {
     this.playground.appendChild(this.canvas);
+    this.canvas.focus();
 
-    this.interval = setInterval(this.render.apply(this), RENDER_INTERVAL);
+    this.interval = setInterval(this.tick, TICK_SPEED);
   }
 
-  private render() {
+  private tick = () => {
+    this.render();
+    // console.log('tick')
+    this.player.tick();
+  }
+
+  private render = () => {
     const ctx = this.context;
 
     const color = (colorValue: Color) => { ctx.fillStyle = colorValue };
@@ -46,10 +61,12 @@ class Game {
     color(Color.Black);
     ctx.fillRect(0, 0, GAME_SIZE, GAME_SIZE)
 
-    playground.forEach((row, rowIndex) => {
+    this.level.forEach((row, rowIndex) => {
       row.forEach((cell, cellIndex) => {
         switch (cell) {
-          case 0: break;
+          case 0:
+          case 3:
+            break;
 
           case 1: {
             color(Color.Blue);
@@ -73,7 +90,7 @@ class Game {
           }
         }
       })
-    });    
+    });
   }
 }
 
