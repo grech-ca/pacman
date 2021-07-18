@@ -1,5 +1,6 @@
 import Game from './game';
 
+import config from '../data/config';
 import { CELL_SIZE, PLAYER_SIZE, STEP_LENGTH } from '../utils/constants';
 import { Direction, Color } from '../utils/enums';
 
@@ -45,12 +46,14 @@ class Player {
     if (this.direction !== Direction.None) {
       const [x, y] = this.getNextPosition().map(value => Math.round(value));
 
-      // highlight next step
-      // this.game.context.fillStyle = '#faa5';
-      // this.game.context.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      if (config.showNextStep) {
+        this.game.context.fillStyle = '#faa5';
+        this.game.context.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      }
 
       if (this.game.level[y][x] !== 1) {
         this.move();
+        this.analizeCell();
       }
     }
 
@@ -65,6 +68,21 @@ class Player {
     if (this.game.level[y][x] !== 1) {
       this.direction = this.nextDirection;
       this.nextDirection = Direction.None;
+    }
+  }
+
+  private analizeCell() {
+    const [x, y] = this.position;
+
+    if (this.game.level[y][x] === 2) {
+      this.game.level = this.game.level.map((row, index) => {
+        if (index !== y) return row;
+
+        return row.map((cell, index) => {
+          if (index === x) return 0;
+          return cell;
+        });
+      })
     }
   }
 
