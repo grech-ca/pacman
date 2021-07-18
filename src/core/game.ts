@@ -18,8 +18,8 @@ class Game {
     this.canvas = document.createElement('canvas');
     this.context = this.canvas.getContext('2d');
 
-    this.canvas.height = GAME_SIZE;
-    this.canvas.width = GAME_SIZE;
+    this.canvas.height = GAME_SIZE * CELL_SIZE;
+    this.canvas.width = GAME_SIZE * CELL_SIZE;
     this.canvas.tabIndex = 0;
 
     this.playground = document.querySelector('.pacman');
@@ -59,7 +59,7 @@ class Game {
     const color = (colorValue: Color) => { ctx.fillStyle = colorValue };
     
     color(Color.Black);
-    ctx.fillRect(0, 0, GAME_SIZE, GAME_SIZE)
+    ctx.fillRect(0, 0, GAME_SIZE * CELL_SIZE, GAME_SIZE * CELL_SIZE)
 
     this.level.forEach((row, rowIndex) => {
       row.forEach((cell, cellIndex) => {

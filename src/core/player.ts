@@ -1,7 +1,7 @@
 import Game from './game';
 
 import config from '../data/config';
-import { CELL_SIZE, PLAYER_SIZE, STEP_LENGTH } from '../utils/constants';
+import { CELL_SIZE, GAME_SIZE, PLAYER_SIZE, STEP_LENGTH } from '../utils/constants';
 import { Direction, Color } from '../utils/enums';
 
 const checkCollision = ([ax, ay]: [number, number], [bx, by]: [number, number]) => {
@@ -39,9 +39,7 @@ class Player {
     this.nextDirection = direction;
   }
 
-  tick() {
-    if (!this.position) return console.error('User cannot be spawned');
-
+  private tryMove() {
     this.checkNextDirection();
     if (this.direction !== Direction.None) {
       const [x, y] = this.getNextPosition().map(value => Math.round(value));
@@ -51,12 +49,25 @@ class Player {
         this.game.context.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
 
-      if (this.game.level[y][x] !== 1) {
-        this.move();
-        this.analizeCell();
-      }
+      if (this.game.level[y][x] === 1) return;
+      // if (this.game.level[y][x] === undefined) {
+      //   switch(this.direction) {
+      //     case Direction.Up:
+
+      //     case Direction.Down:
+      //     case Direction.Left:
+      //     case Direction.Right:
+      //   }
+      // };
+      this.move();
     }
 
+  }
+
+  tick() {
+    if (!this.position) return console.error('User cannot be spawned');
+
+    this.tryMove();
     this.render();
   }
 
@@ -86,18 +97,26 @@ class Player {
     }
   }
 
-  private getNextPosition(direction: Direction = this.direction, offset: number = 0): [number, number] {
+  private getNextPosition(direction: Direction = this.direction): [number, number] {
     const [x, y] = this.position;
 
     switch(direction) {
-      case Direction.Up:
-        return [x, y - (STEP_LENGTH + offset)];
-      case Direction.Down:
-        return [x, y + STEP_LENGTH + offset];
-      case Direction.Left:
-        return [x - (STEP_LENGTH + offset), y];
-      case Direction.Right:
-        return [x + STEP_LENGTH + offset, y];
+      case Direction.Up: {
+        const newY = y - STEP_LENGTH;
+        return [x, newY < 0 ? GAME_SIZE - 1 : newY];
+      }
+      case Direction.Down: {
+        const newY = y + STEP_LENGTH;
+        return [x, newY > GAME_SIZE - 1 ? 0 : newY];
+      }
+      case Direction.Left: {
+        const newX = x - STEP_LENGTH;
+        return [newX < 0 ? GAME_SIZE - 1 : newX, y];
+      }
+      case Direction.Right: {
+        const newX = x + STEP_LENGTH;
+        return [newX > GAME_SIZE - 1 ? 0 : newX, y];
+      }
     }
 
     return this.position;
@@ -105,6 +124,7 @@ class Player {
 
   private move() {
     this.position = this.getNextPosition();
+    this.analizeCell();
   }
 
   private render() {
