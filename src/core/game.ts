@@ -1,9 +1,10 @@
 import playground from '../data/playground';
 import Player from './player';
+import Ghost from './ghost';
 
 import { GAME_SIZE, CELL_SIZE, FOOD_SIZE, TICK_SPEED } from '../utils/constants';
 import { ArrowDirectionMap } from '../utils/mappings';
-import { Color, Arrow } from '../utils/enums';
+import { Color, Arrow, LevelObject } from '../utils/enums';
 
 class Game {
   canvas: HTMLCanvasElement;
@@ -11,6 +12,7 @@ class Game {
   playground: HTMLDivElement;
   level: number[][];
   player: Player;
+  ghosts: Ghost[] = [];
 
   interval: ReturnType<typeof setInterval>;
 
@@ -25,7 +27,16 @@ class Game {
     this.playground = document.querySelector('.pacman');
     this.level = playground;
 
-    this.player = new Player(this);
+    for (let row = 0; row <= this.level.length; row++) {
+      for (let col = 0; col <= this.level[row].length; col++) {
+        if (this.level[row][col] === LevelObject.Player) {
+          this.player = new Player(this, [col, row]);
+          break;
+        }
+      }
+
+      if (this.player) break;
+    }
 
     this.canvas.addEventListener('keydown', e => {
       if (Object.values(Arrow).includes(e.key as Arrow)) this.player.setDirection(ArrowDirectionMap[e.key]);
@@ -37,7 +48,13 @@ class Game {
           this.interval = setInterval(this.tick, TICK_SPEED);
         }
       }
-    })
+    });
+
+    this.level.forEach((row, rowIndex) => {
+      row.forEach((cell, cellIndex) => {
+        if (cell === LevelObject.Ghost) this.ghosts.push(new Ghost(this, [cellIndex, rowIndex]));
+      });
+    });
   }
 
   start() {
@@ -49,8 +66,8 @@ class Game {
 
   private tick = () => {
     this.render();
-    // console.log('tick')
     this.player.tick();
+    this.ghosts.forEach(ghost => ghost.tick());
   }
 
   private render = () => {
@@ -64,11 +81,11 @@ class Game {
     this.level.forEach((row, rowIndex) => {
       row.forEach((cell, cellIndex) => {
         switch (cell) {
-          case 0:
-          case 3:
+          case LevelObject.Air:
+          case LevelObject.Player:
             break;
 
-          case 1: {
+          case LevelObject.Wall: {
             color(Color.Blue);
             ctx.fillRect(
               cellIndex * CELL_SIZE,
@@ -79,7 +96,7 @@ class Game {
             break;
           }
 
-          case 2: {
+          case LevelObject.Food: {
             color(Color.Orange);
             ctx.fillRect(
               cellIndex * CELL_SIZE + ((CELL_SIZE - FOOD_SIZE) / 2),

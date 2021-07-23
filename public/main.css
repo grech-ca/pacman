@@ -21,3 +21,7 @@ body {
 .pacman canvas {
   border: 4px solid #000;
 }
+
+.dev {
+  width: 100px;
+}

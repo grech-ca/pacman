@@ -4,6 +4,10 @@ export enum Color {
   Blue = '#00f',
   Orange = '#fa0',
   Yellow = '#ff0',
+  Purple = '#f0a',
+  Green = '#0f0',
+  Red = '#f00',
+  Cyan = '#0ff'
 }
 
 export enum Arrow {
@@ -26,4 +30,5 @@ export enum LevelObject {
   Wall,
   Food,
   Player,
+  Ghost
 };
