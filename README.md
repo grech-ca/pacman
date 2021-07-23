@@ -7,7 +7,7 @@ Before you start the project, install all required packages, with:
 yarn
 ```
 
-To start ther project, run:
+To start the project, run:
 ```bash
 yarn add
 ```
